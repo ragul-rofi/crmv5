@@ -1,12 +1,12 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { api } from "@/lib/api";
-import Layout from "@/components/Layout";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import Layout from "@/components/layout/Layout";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/layout/card";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line } from 'recharts';
 import { format, parseISO } from 'date-fns';
 import { Building, ListChecks, Ticket, Users } from "lucide-react";
-import StatCard from "@/components/StatCard";
+import StatCard from "@/components/data/StatCard";
 
 // Data fetching functions
 const fetchReportStats = async () => {
@@ -39,7 +39,7 @@ const fetchTicketsForCharts = async () => {
 
 
 const ReportsPage = () => {
-  const [searchOpen, setSearchOpen] = useState(false);
+  const [, setSearchOpen] = useState(false);
   
   const { data: stats, isLoading: isLoadingStats } = useQuery({
     queryKey: ["reportStats"],
@@ -161,7 +161,7 @@ const ReportsPage = () => {
               <ResponsiveContainer width="100%" height={300}>
                 <PieChart>
                   <Pie data={taskChartData} cx="50%" cy="50%" labelLine={false} outerRadius={80} fill="#8884d8" dataKey="value" nameKey="name" label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}>
-                    {taskChartData.map((entry, index) => (
+                    {taskChartData.map((_, index) => (
                       <Cell key={`cell-${index}`} fill={PIE_COLORS[index % PIE_COLORS.length]} />
                     ))}
                   </Pie>
@@ -179,7 +179,7 @@ const ReportsPage = () => {
               <ResponsiveContainer width="100%" height={300}>
                 <PieChart>
                   <Pie data={ticketStatusChartData} cx="50%" cy="50%" labelLine={false} outerRadius={80} fill="#8884d8" dataKey="value" nameKey="name" label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}>
-                    {ticketStatusChartData.map((entry, index) => (
+                    {ticketStatusChartData.map((_, index) => (
                       <Cell key={`cell-${index}`} fill={PIE_COLORS[index % PIE_COLORS.length]} />
                     ))}
                   </Pie>

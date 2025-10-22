@@ -4,8 +4,8 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/sonner";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import { UserProvider } from "./contexts/UserContext";
-import { ThemeProvider } from "./components/ThemeProvider";
-import Layout from "./components/Layout";
+import { ThemeProvider } from "./components/theme/ThemeProvider";
+import Layout from "./components/layout/Layout";
 import LoginPage from "./pages/LoginPage";
 import Index from "./pages/Index";
 import DataPage from "./pages/DataPage";
@@ -16,7 +16,7 @@ import UsersPage from "./pages/UsersPage";
 import AdminPanel from "./pages/AdminPanel";
 import CompanyDetailPage from "./pages/CompanyDetailPage";
 import ApiTestPage from "./pages/ApiTestPage";
-import { SearchCommand } from "./components/SearchCommand";
+import { SearchCommand } from "./components/search/SearchCommand";
 
 const AppContent = () => {
   const [openSearch, setOpenSearch] = useState(false);

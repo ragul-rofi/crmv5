@@ -1,8 +1,8 @@
-import UserNav from "./UserNav";
-import NotificationBell from "./NotificationBell";
-import { ThemeToggle } from "./ThemeToggle";
+import UserNav from "../users/UserNav";
+import NotificationBell from "../notifications/NotificationBell";
+import { ThemeToggle } from "../theme/ThemeToggle";
 import { Search } from "lucide-react";
-import { Button } from "./ui/button";
+import { Button } from "@/components/ui/button";
 
 interface HeaderProps {
   onSearchClick: () => void;

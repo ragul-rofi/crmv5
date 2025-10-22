@@ -1,9 +1,10 @@
 import { Task } from "@/types";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/layout/card";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/layout/table";
 import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
 
+// Fixed TypeScript errors - using correct property names
 interface CompanyTasksProps {
   tasks: Task[];
 }
@@ -32,8 +33,8 @@ export const CompanyTasks = ({ tasks }: CompanyTasksProps) => {
                   <TableCell>
                     <Badge variant={task.status === "Completed" ? "default" : "secondary"}>{task.status}</Badge>
                   </TableCell>
-                  <TableCell>{task.dueDate ? format(new Date(task.dueDate), "PPP") : "N/A"}</TableCell>
-                  <TableCell>{task.users?.fullName || "Unassigned"}</TableCell>
+                  <TableCell>{task.deadline ? format(new Date(task.deadline), "PPP") : "N/A"}</TableCell>
+                  <TableCell>{task.users?.full_name || "Unassigned"}</TableCell>
                 </TableRow>
               ))
             ) : (

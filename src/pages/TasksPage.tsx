@@ -27,7 +27,7 @@ import {
 import { DataTable } from "./data/DataTable";
 import { getColumns } from "./tasks/columns";
 import TaskForm from "./tasks/TaskForm";
-import { KanbanBoard } from "@/components/KanbanBoard";
+import { KanbanBoard } from "@/components/tasks/KanbanBoard";
 
 const fetchTasks = async () => {
   return api.getTasks();

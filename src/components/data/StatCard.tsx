@@ -1,12 +1,20 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/layout/card";
 import { LucideIcon } from "lucide-react";
 
 interface StatCardProps {
+  /** The title of the stat card */
   title: string;
+  /** The value to display in the stat card */
   value: string | number;
+  /** The icon to display in the stat card */
   icon: LucideIcon;
 }
 
+/**
+ * A component that displays a statistic in a card format with an icon
+ * @param props - The props for the StatCard component
+ * @returns A React element representing the stat card
+ */
 const StatCard = ({ title, value, icon: Icon }: StatCardProps) => {
   return (
     <Card>

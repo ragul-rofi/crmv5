@@ -1,9 +1,9 @@
 import { useQuery } from "@tanstack/react-query";
 import { api } from "@/lib/api";
 import { useUser } from "@/contexts/UserContext";
-import StatCard from "@/components/StatCard";
-import RecentTasks from "@/components/RecentTasks";
-import RecentTickets from "@/components/RecentTickets";
+import StatCard from "@/components/data/StatCard";
+import RecentTasks from "@/components/tasks/RecentTasks";
+import RecentTickets from "@/components/tickets/RecentTickets";
 import { ListChecks, Ticket, Building, Users } from "lucide-react";
 
 const fetchDashboardStats = async (userId: string) => {

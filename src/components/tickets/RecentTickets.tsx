@@ -3,7 +3,7 @@ import { api } from "@/lib/api";
 import { Link } from "react-router-dom";
 import { useUser } from "@/contexts/UserContext";
 import { Ticket } from "@/types";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/layout/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 

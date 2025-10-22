@@ -5,7 +5,7 @@ import * as z from "zod";
 import { toast } from "sonner";
 import { api } from "@/lib/api";
 import { useUser } from "@/contexts/UserContext";
-import Layout from "@/components/Layout";
+import Layout from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -15,7 +15,7 @@ import {
   CardHeader,
   CardTitle,
   CardDescription,
-} from "@/components/ui/card";
+} from "@/components/ui/layout/card";
 import {
   Form,
   FormControl,
@@ -38,7 +38,7 @@ const SettingsPage = () => {
   const { userProfile, refreshUserProfile } = useUser();
   const [isProfileSaving, setIsProfileSaving] = useState(false);
   const [isPasswordSaving, setIsPasswordSaving] = useState(false);
-  const [searchOpen, setSearchOpen] = useState(false);
+  const [, setSearchOpen] = useState(false);
 
   const profileForm = useForm<z.infer<typeof profileFormSchema>>({
     resolver: zodResolver(profileFormSchema),

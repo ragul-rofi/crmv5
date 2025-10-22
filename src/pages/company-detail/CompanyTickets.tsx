@@ -1,6 +1,6 @@
 import { Ticket } from "@/types";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/layout/card";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/layout/table";
 import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
 
@@ -33,7 +33,7 @@ export const CompanyTickets = ({ tickets }: CompanyTicketsProps) => {
                     <Badge variant={ticket.isResolved ? "default" : "destructive"}>{ticket.isResolved ? "Resolved" : "Open"}</Badge>
                   </TableCell>
                   <TableCell>{format(new Date(ticket.created_at), "PPP")}</TableCell>
-                  <TableCell>{ticket.users?.fullName || "Unassigned"}</TableCell>
+                  <TableCell>{ticket.assignedTo?.full_name || "Unassigned"}</TableCell>
                 </TableRow>
               ))
             ) : (
