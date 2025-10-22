@@ -1,0 +1,25 @@
+# Server files (Vercel only needs the frontend)
+server/
+scripts/
+tsconfig.server.json
+render.yaml
+
+# Build artifacts
+dist/server/
+
+# Log files
+*.log
+
+# Environment files (these should be set in Vercel dashboard)
+.env
+.env.local
+.env.production
+.env.development
+
+# Testing
+__tests__/
+coverage/
+
+# Documentation
+README.md
+docs/

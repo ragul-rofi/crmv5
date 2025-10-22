@@ -1,0 +1,22 @@
+services:
+  - type: web
+    name: crm-backend
+    env: node
+    buildCommand: pnpm render-build
+    startCommand: node dist/server/index.js
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 3001
+
+  # PostgreSQL Database (managed service)
+  - type: managed-db
+    name: crm-database
+    env: postgres
+    plan: free
+    region: oregon
+    disk:
+      name: crm-db-data
+      mountPath: /var/lib/postgresql/data
+      sizeGB: 1
