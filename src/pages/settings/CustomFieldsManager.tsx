@@ -17,6 +17,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
+  DialogDescription,
 } from "@/components/ui/dialog";
 import {
   Table,
@@ -25,9 +26,15 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
+} from "@/components/ui/layout/table";
 import { PlusCircle } from "lucide-react";
 import { CustomFieldForm } from "./CustomFieldForm";
+import * as z from "zod";
+
+const formSchema = z.object({
+  label: z.string().min(2, "Label must be at least 2 characters."),
+  type: z.enum(["Text", "Number", "Date"]),
+});
 
 const fetchCustomFieldDefinitions = async () => {
   return api.getCustomFields();
@@ -56,8 +63,12 @@ const CustomFieldsManager = () => {
     },
   });
 
-  const handleSave = (data: { label: string; type: "Text" | "Number" | "Date" }) => {
-    mutation.mutate(data);
+  const handleSave = (data: z.infer<typeof formSchema>) => {
+    // The zod schema validation ensures these fields are present
+    mutation.mutate({
+      label: data.label,
+      type: data.type
+    } as Omit<CustomFieldDefinition, "id" | "created_at">);
   };
 
   return (
@@ -76,9 +87,12 @@ const CustomFieldsManager = () => {
                 <PlusCircle className="mr-2 h-4 w-4" /> Add Field
               </Button>
             </DialogTrigger>
-            <DialogContent>
+            <DialogContent aria-describedby="custom-field-dialog-description">
               <DialogHeader>
                 <DialogTitle>Add New Custom Field</DialogTitle>
+                <DialogDescription id="custom-field-dialog-description">
+                  Create a new custom field for your data.
+                </DialogDescription>
               </DialogHeader>
               <CustomFieldForm
                 onSave={handleSave}

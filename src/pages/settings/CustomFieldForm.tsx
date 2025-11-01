@@ -63,7 +63,7 @@ export const CustomFieldForm = ({ onSave, onCancel, isSaving }: CustomFieldFormP
               <FormLabel>Field Type</FormLabel>
               <Select onValueChange={field.onChange} defaultValue={field.value}>
                 <FormControl>
-                  <SelectTrigger>
+                  <SelectTrigger id="type">
                     <SelectValue placeholder="Select a field type" />
                   </SelectTrigger>
                 </FormControl>

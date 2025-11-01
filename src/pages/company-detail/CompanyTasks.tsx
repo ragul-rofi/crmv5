@@ -15,26 +15,26 @@ export const CompanyTasks = ({ tasks }: CompanyTasksProps) => {
       <CardHeader>
         <CardTitle>Tasks</CardTitle>
       </CardHeader>
-      <CardContent>
+      <CardContent className="overflow-x-auto">
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Title</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead>Due Date</TableHead>
-              <TableHead>Assigned To</TableHead>
+              <TableHead className="whitespace-nowrap">Title</TableHead>
+              <TableHead className="whitespace-nowrap">Status</TableHead>
+              <TableHead className="whitespace-nowrap">Due Date</TableHead>
+              <TableHead className="whitespace-nowrap">Assigned To</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {tasks.length > 0 ? (
               tasks.map((task) => (
                 <TableRow key={task.id}>
-                  <TableCell className="font-medium">{task.title}</TableCell>
+                  <TableCell className="font-medium whitespace-nowrap">{task.title}</TableCell>
                   <TableCell>
                     <Badge variant={task.status === "Completed" ? "default" : "secondary"}>{task.status}</Badge>
                   </TableCell>
-                  <TableCell>{task.deadline ? format(new Date(task.deadline), "PPP") : "N/A"}</TableCell>
-                  <TableCell>{task.users?.full_name || "Unassigned"}</TableCell>
+                  <TableCell className="whitespace-nowrap">{task.deadline ? format(new Date(task.deadline), "PPP") : "N/A"}</TableCell>
+                  <TableCell className="whitespace-nowrap">{task.users?.full_name || "Unassigned"}</TableCell>
                 </TableRow>
               ))
             ) : (

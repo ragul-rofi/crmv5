@@ -1,6 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
-import { useUser } from "@/contexts/UserContext";
 import { Task } from "@/types";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/layout/card";
 import { Badge } from "@/components/ui/badge";
@@ -12,7 +11,8 @@ import { api } from "@/lib/api";
  * @returns A promise that resolves to an array of Task objects
  */
 const fetchRecentTasks = async () => {
-  return api.getTasks();
+  const response = await api.getMyTasks(1, 5);
+  return response.data || [];
 };
 
 /**
@@ -20,25 +20,17 @@ const fetchRecentTasks = async () => {
  * @returns A React element representing the recent tasks card
  */
 const RecentTasks = () => {
-  const { userProfile } = useUser();
-  const { data: allTasks, isLoading } = useQuery<Task[]>({
+  const { data: userTasks, isLoading } = useQuery<Task[]>({
     queryKey: ["recentTasks"],
     queryFn: fetchRecentTasks,
   });
 
-  // Filter tasks assigned to the current user and get the 5 most recent
-  const userTasks = userProfile && allTasks 
-    ? allTasks
-        .filter(task => task.assignedToId === userProfile.id)
-        .slice(0, 5)
-    : [];
-
   return (
-    <Card>
+    <Card className="h-full flex flex-col">
       <CardHeader>
         <CardTitle>My Recent Tasks</CardTitle>
       </CardHeader>
-      <CardContent>
+      <CardContent className="flex-1 overflow-auto">
         {isLoading ? (
           <div className="space-y-4">
             {[...Array(3)].map((_, i) => <Skeleton key={i} className="h-10 w-full" />)}

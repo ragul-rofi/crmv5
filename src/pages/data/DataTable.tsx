@@ -11,6 +11,8 @@ import {
   ColumnFiltersState,
   RowSelectionState,
   useReactTable,
+  PaginationState,
+  Updater,
 } from "@tanstack/react-table";
 import {
   Table,
@@ -22,6 +24,14 @@ import {
 } from "@/components/ui/layout/table";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { BulkOperations } from "@/components/ui/bulk-operations";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useState } from "react";
 
 interface DataTableProps<TData, TValue> {
@@ -30,7 +40,13 @@ interface DataTableProps<TData, TValue> {
   filterColumnId: string;
   filterPlaceholder: string;
   onBulkDelete?: (selectedIds: string[]) => void;
+  onBulkAction?: (action: string, ids: string[], data?: any) => Promise<void>;
+  entityType?: 'companies' | 'tasks' | 'tickets' | 'users';
   enableRowSelection?: boolean;
+  pagination?: PaginationState;
+  onPaginationChange?: (pagination: Updater<PaginationState>) => void;
+  pageCount?: number;
+  totalCount?: number;
 }
 
 export function DataTable<TData, TValue>({
@@ -39,7 +55,13 @@ export function DataTable<TData, TValue>({
   filterColumnId,
   filterPlaceholder,
   onBulkDelete,
+  onBulkAction,
+  entityType = 'companies',
   enableRowSelection = false,
+  pagination,
+  onPaginationChange,
+  pageCount,
+  totalCount,
 }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
@@ -48,19 +70,23 @@ export function DataTable<TData, TValue>({
   const table = useReactTable({
     data,
     columns,
-    getCoreRowModel: getCoreRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
-    onSortingChange: setSorting,
-    getSortedRowModel: getSortedRowModel(),
-    onColumnFiltersChange: setColumnFilters,
-    getFilteredRowModel: getFilteredRowModel(),
-    enableRowSelection: enableRowSelection,
-    onRowSelectionChange: setRowSelection,
+    pageCount: pageCount ?? -1,
     state: {
       sorting,
       columnFilters,
       rowSelection,
+      pagination,
     },
+    onSortingChange: setSorting,
+    onColumnFiltersChange: setColumnFilters,
+    onRowSelectionChange: setRowSelection,
+    onPaginationChange: onPaginationChange,
+    getCoreRowModel: getCoreRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
+    getSortedRowModel: getSortedRowModel(),
+    getFilteredRowModel: getFilteredRowModel(),
+    enableRowSelection: enableRowSelection,
+    manualPagination: true,
   });
 
   const selectedRows = table.getFilteredSelectedRowModel().rows;
@@ -74,8 +100,16 @@ export function DataTable<TData, TValue>({
   };
 
   return (
-    <div>
-      <div className="flex items-center justify-between py-4">
+    <div className="overflow-x-auto w-full">
+      {enableRowSelection && selectedIds.length > 0 && onBulkAction && (
+        <BulkOperations
+          selectedIds={selectedIds}
+          entityType={entityType}
+          onBulkAction={onBulkAction}
+          onClearSelection={() => setRowSelection({})}
+        />
+      )}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
         <Input
           placeholder={filterPlaceholder}
           value={
@@ -90,6 +124,7 @@ export function DataTable<TData, TValue>({
           <Button 
             variant="destructive" 
             onClick={handleBulkDelete}
+            className="w-full sm:w-auto"
           >
             Delete Selected ({selectedIds.length})
           </Button>
@@ -102,7 +137,7 @@ export function DataTable<TData, TValue>({
               <TableRow key={headerGroup.id}>
                 {headerGroup.headers.map((header) => {
                   return (
-                    <TableHead key={header.id}>
+                    <TableHead key={header.id} className="whitespace-nowrap">
                       {header.isPlaceholder
                         ? null
                         : flexRender(
@@ -123,7 +158,7 @@ export function DataTable<TData, TValue>({
                   data-state={row.getIsSelected() && "selected"}
                 >
                   {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id}>
+                    <TableCell key={cell.id} className="whitespace-nowrap">
                       {flexRender(
                         cell.column.columnDef.cell,
                         cell.getContext(),
@@ -145,23 +180,59 @@ export function DataTable<TData, TValue>({
           </TableBody>
         </Table>
       </div>
-      <div className="flex items-center justify-end space-x-2 py-4">
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => table.previousPage()}
-          disabled={!table.getCanPreviousPage()}
-        >
-          Previous
-        </Button>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => table.nextPage()}
-          disabled={!table.getCanNextPage()}
-        >
-          Next
-        </Button>
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mt-4">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4 w-full sm:w-auto">
+          <div className="text-sm text-muted-foreground whitespace-nowrap">
+            Showing {data.length} of {totalCount} results
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="text-sm text-muted-foreground whitespace-nowrap">Rows per page:</span>
+            <Select
+              value={table.getState().pagination.pageSize.toString()}
+              onValueChange={(value) => {
+                if (onPaginationChange) {
+                  onPaginationChange((old) => ({
+                    ...old,
+                    pageSize: Number(value),
+                    pageIndex: 0, // Reset to first page when changing page size
+                  }));
+                }
+              }}
+            >
+              <SelectTrigger className="h-8 w-16">
+                <SelectValue placeholder={table.getState().pagination.pageSize.toString()} />
+              </SelectTrigger>
+              <SelectContent side="top">
+                {[10, 25, 50].map((pageSize) => (
+                  <SelectItem key={pageSize} value={pageSize.toString()}>
+                    {pageSize}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+        <div className="flex items-center space-x-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => table.previousPage()}
+            disabled={!table.getCanPreviousPage()}
+          >
+            Previous
+          </Button>
+          <div className="text-sm">
+            Page {table.getState().pagination.pageIndex + 1} of {table.getPageCount()}
+          </div>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => table.nextPage()}
+            disabled={!table.getCanNextPage()}
+          >
+            Next
+          </Button>
+        </div>
       </div>
     </div>
   );

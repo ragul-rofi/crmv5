@@ -8,8 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 
 const fetchRecentTickets = async () => {
-  const tickets = await api.getTickets();
-  return tickets.slice(0, 5);
+  return api.getMyTickets();
 };
 
 const RecentTickets = () => {

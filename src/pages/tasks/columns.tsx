@@ -1,7 +1,7 @@
 "use client";
 
 import { ColumnDef } from "@tanstack/react-table";
-import { ArrowUpDown, MoreHorizontal } from "lucide-react";
+import { ArrowUpDown, MoreHorizontal, Target, Calendar } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -33,12 +33,61 @@ export const getColumns = (
     },
   },
   {
-    accessorKey: "companies.name",
-    header: "Company",
+    accessorKey: "task_type",
+    header: "Type",
+    cell: ({ row }) => {
+      const taskType = row.getValue("task_type") as string;
+      return taskType || "General";
+    },
   },
   {
-    accessorKey: "users.full_name",
+    accessorKey: "assignedToName",
     header: "Assigned To",
+    cell: ({ row }) => {
+      const task = row.original;
+      const assignedTo = task.assignedToName || task.users?.full_name;
+      return assignedTo || "Unassigned";
+    },
+  },
+  {
+    accessorKey: "assignedByName",
+    header: "Assigned By",
+    cell: ({ row }) => {
+      const task = row.original;
+      const assignedBy = task.assignedByName || task.assigned_by_name;
+      return assignedBy || "System";
+    },
+  },
+  {
+    accessorKey: "targetCount",
+    header: "Target",
+    cell: ({ row }) => {
+      const task = row.original;
+      if (task.taskType === "DataCollection" || task.task_type === "DataCollection") {
+        const targetCount = task.targetCount || task.target_count;
+        return (
+          <div className="flex items-center">
+            <Target className="h-4 w-4 mr-1" />
+            {targetCount ? `${targetCount} companies` : 'Not set'}
+          </div>
+        );
+      }
+      return "N/A";
+    },
+  },
+  {
+    accessorKey: "startDate",
+    header: "Start Date",
+    cell: ({ row }) => {
+      const task = row.original;
+      const date = task.startDate || task.start_date || task.createdAt || task.created_at;
+      return date ? (
+        <div className="flex items-center">
+          <Calendar className="h-4 w-4 mr-1" />
+          {format(new Date(date), "PPP")}
+        </div>
+      ) : "N/A";
+    },
   },
   {
     accessorKey: "status",
@@ -50,7 +99,7 @@ export const getColumns = (
           ? "default"
           : status === "InProgress"
             ? "secondary"
-            : "outline";
+          : "outline";
       return <Badge variant={variant}>{status}</Badge>;
     },
   },

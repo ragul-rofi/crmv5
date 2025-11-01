@@ -15,6 +15,7 @@ interface DataTableRowActionsProps {
   onDelete: () => void;
   onFinalize?: () => void;
   showFinalize?: boolean;
+  isFinalizedData?: boolean; // Add isFinalizedData prop
 }
 
 export function DataTableRowActions({
@@ -22,8 +23,14 @@ export function DataTableRowActions({
   onDelete,
   onFinalize,
   showFinalize = false,
+  isFinalizedData = false, // Default to false
 }: DataTableRowActionsProps) {
-  const { canEdit, canDelete, canFinalize, isReadOnly } = usePermissions();
+  const { canEdit, canDelete, canFinalize, canRead } = usePermissions();
+
+  // Don't render if user has no permissions at all
+  if (!canRead && !canEdit && !canDelete && !canFinalize) {
+    return null;
+  }
 
   return (
     <DropdownMenu>
@@ -36,25 +43,36 @@ export function DataTableRowActions({
       <DropdownMenuContent align="end">
         <DropdownMenuLabel>Actions</DropdownMenuLabel>
         <DropdownMenuSeparator />
-        {isReadOnly ? (
+        {isFinalizedData ? (
+          // For finalized data, only show view details
           <DropdownMenuItem onClick={onEdit}>
             <Eye className="mr-2 h-4 w-4" />
             View Details
           </DropdownMenuItem>
         ) : (
           <>
-            {canEdit && (
-              <DropdownMenuItem onClick={onEdit}>
-                <Pencil className="mr-2 h-4 w-4" />
-                Edit
-              </DropdownMenuItem>
-            )}
+            {/* Always show view/edit option for users who can read */}
+            <DropdownMenuItem onClick={onEdit}>
+              {canEdit ? (
+                <>
+                  <Pencil className="mr-2 h-4 w-4" />
+                  Edit
+                </>
+              ) : (
+                <>
+                  <Eye className="mr-2 h-4 w-4" />
+                  View Details
+                </>
+              )}
+            </DropdownMenuItem>
+            
             {showFinalize && onFinalize && canFinalize && (
               <DropdownMenuItem onClick={onFinalize} className="text-green-600">
                 <CheckCircle className="mr-2 h-4 w-4" />
                 Finalize
               </DropdownMenuItem>
             )}
+            
             {canDelete && (
               <DropdownMenuItem onClick={onDelete} className="text-red-600">
                 <Trash className="mr-2 h-4 w-4" />

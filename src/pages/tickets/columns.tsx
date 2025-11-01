@@ -29,12 +29,20 @@ export const getColumns = (
     ),
   },
   {
-    accessorKey: "companies.name",
+    accessorKey: "companyId",
     header: "Company",
+    cell: ({ row }) => {
+      const companyName = (row.original as any).company_name as string | undefined;
+      return companyName || "No Company";
+    },
   },
   {
-    accessorKey: "assignedTo.full_name",
+    accessorKey: "assignedToId",
     header: "Assigned To",
+    cell: ({ row }) => {
+      const assignedToName = (row.original as any).assigned_to_name as string | undefined;
+      return assignedToName || "Unassigned";
+    },
   },
   {
     accessorKey: "isResolved",

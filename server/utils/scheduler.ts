@@ -22,12 +22,12 @@ export function startDeadlineReminders() {
       today.setHours(0, 0, 0, 0);
       
       const result = await query(
-        `SELECT t.id, t.title, t.deadline, t."assignedToId", 
+        `SELECT t.id, t.title, t.deadline, t.assigned_to_id, 
                 u.full_name, u.email,
                 c.name as company_name
          FROM tasks t
-         JOIN users u ON t."assignedToId" = u.id
-         LEFT JOIN companies c ON t."companyId" = c.id
+         JOIN users u ON t.assigned_to_id = u.id
+         LEFT JOIN companies c ON t.company_id = c.id
          WHERE t.deadline BETWEEN $1 AND $2 
            AND t.status != 'Completed'
          ORDER BY t.deadline ASC`,
@@ -55,7 +55,7 @@ export function startDeadlineReminders() {
         const companyInfo = task.company_name ? ` for ${task.company_name}` : '';
         const message = `⏰ Deadline Alert: Task "${task.title}"${companyInfo} is due on ${formattedDate}`;
         
-        await createNotification(task.assignedToId, message);
+        await createNotification(task.assigned_to_id, message);
         console.log(`✉️  Sent reminder to ${task.full_name} for task "${task.title}"`);
       }
       
@@ -81,12 +81,12 @@ export function startOverdueTaskNotifications() {
       const now = new Date();
       
       const result = await query(
-        `SELECT t.id, t.title, t.deadline, t."assignedToId",
+        `SELECT t.id, t.title, t.deadline, t.assigned_to_id,
                 u.full_name, u.email,
                 c.name as company_name
          FROM tasks t
-         JOIN users u ON t."assignedToId" = u.id
-         LEFT JOIN companies c ON t."companyId" = c.id
+         JOIN users u ON t.assigned_to_id = u.id
+         LEFT JOIN companies c ON t.company_id = c.id
          WHERE t.deadline < $1 
            AND t.status != 'Completed'
          ORDER BY t.deadline ASC`,
@@ -104,7 +104,7 @@ export function startOverdueTaskNotifications() {
         const companyInfo = task.company_name ? ` for ${task.company_name}` : '';
         const message = `🚨 OVERDUE: Task "${task.title}"${companyInfo} is past its deadline!`;
         
-        await createNotification(task.assignedToId, message);
+        await createNotification(task.assigned_to_id, message);
         console.log(`✉️  Sent overdue notice to ${task.full_name} for task "${task.title}"`);
       }
       

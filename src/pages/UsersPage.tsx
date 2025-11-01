@@ -27,9 +27,10 @@ import EditUserForm from "./users/EditUserForm";
 import CreateUserForm from "./users/CreateUserForm";
 import { usePermissions } from "@/hooks/usePermissions";
 import { Navigate } from "react-router-dom";
+import { PaginationState } from "@tanstack/react-table";
 
-const fetchUsers = async () => {
-  return api.getUsers();
+const fetchUsers = async (page: number = 1, limit: number = 50) => {
+  return api.getUsers(page, limit);
 };
 
 const UsersPage = () => {
@@ -39,23 +40,37 @@ const UsersPage = () => {
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [isDeleteAlertOpen, setIsDeleteAlertOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
-
-  const {
-    data: users,
-    isLoading,
-    isError,
-  } = useQuery<User[]>({
-    queryKey: ["users"],
-    queryFn: fetchUsers,
+  
+  // Pagination state
+  const [pagination, setPagination] = useState<PaginationState>({
+    pageIndex: 0,
+    pageSize: 50,
   });
 
+  const {
+    data: usersData,
+    isLoading,
+    isError,
+  } = useQuery({
+    queryKey: ["users", pagination.pageIndex, pagination.pageSize],
+    queryFn: () => fetchUsers(pagination.pageIndex + 1, pagination.pageSize),
+  });
+  
+  // Extract data and pagination info
+  const users = usersData?.data || [];
+  const paginationInfo = {
+    page: usersData?.pagination?.page || 1,
+    pages: usersData?.pagination?.pages || 1,
+    total: usersData?.pagination?.total || 0,
+  };
+
   const updateMutation = useMutation({
-    mutationFn: async ({ userId, role }: { userId: string; role: User["role"] }) => {
-      return api.updateUser(userId, { role });
+    mutationFn: async ({ userId, userData }: { userId: string; userData: Partial<User> }) => {
+      return api.updateUser(userId, userData);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["users"] });
-      toast.success("User role updated successfully.");
+      toast.success("User updated successfully.");
       setIsEditDialogOpen(false);
       setSelectedUser(null);
     },
@@ -93,6 +108,21 @@ const UsersPage = () => {
     },
   });
 
+  const bulkDeleteMutation = useMutation({
+    mutationFn: async (userIds: string[]) => {
+      // Delete users one by one
+      await Promise.all(userIds.map(id => api.deleteUser(id)));
+      return userIds.length;
+    },
+    onSuccess: (count) => {
+      queryClient.invalidateQueries({ queryKey: ["users"] });
+      toast.success(`${count} users deleted successfully.`);
+    },
+    onError: (error: Error) => {
+      toast.error(`Bulk delete failed: ${error.message}`);
+    },
+  });
+
   const handleEdit = (user: User) => {
     setSelectedUser(user);
     setIsEditDialogOpen(true);
@@ -109,8 +139,16 @@ const UsersPage = () => {
     }
   };
 
-  const handleUpdateRole = (userId: string, role: User["role"]) => {
-    updateMutation.mutate({ userId, role });
+  const handleBulkDelete = (selectedIds: string[]) => {
+    if (selectedIds.length === 0) return;
+    
+    if (confirm(`Are you sure you want to delete ${selectedIds.length} users? This action cannot be undone.`)) {
+      bulkDeleteMutation.mutate(selectedIds);
+    }
+  };
+
+  const handleUpdateUser = (userId: string, userData: Partial<User>) => {
+    updateMutation.mutate({ userId, userData });
   };
 
   const handleCreateUser = (userData: any) => {
@@ -122,7 +160,7 @@ const UsersPage = () => {
   };
 
   const columns = useMemo(
-    () => getColumns(handleEdit, handleDelete, permissions.role === 'Admin'),
+    () => getColumns(handleEdit, handleDelete, permissions.role === 'Admin', permissions.role === 'Admin'),
     [permissions.role]
   );
 
@@ -135,29 +173,41 @@ const UsersPage = () => {
   if (isError) return <div>Error fetching users</div>;
 
   return (
-      <div className="p-8 pt-6">
-        <div className="flex items-center justify-between mb-6">
-          <h1 className="text-3xl font-bold">User Management</h1>
-          <Button onClick={() => setIsCreateDialogOpen(true)}>Add User</Button>
+      <div className="p-6 space-y-6">
+        <div className="flex flex-col md:flex-row md:items-center justify-between mb-6 gap-4">
+          <div>
+            <h1 className="text-2xl md:text-3xl font-bold">User Management</h1>
+            <p className="text-muted-foreground mt-1">Manage user accounts and permissions</p>
+          </div>
+          <Button onClick={() => setIsCreateDialogOpen(true)} className="btn-primary">Add User</Button>
         </div>
         <DataTable
           columns={columns}
           data={users || []}
           filterColumnId="full_name"
           filterPlaceholder="Filter by user name..."
+          enableRowSelection={permissions.role === 'Admin'}
+          onBulkDelete={permissions.role === 'Admin' ? handleBulkDelete : undefined}
+          pagination={{
+            pageIndex: pagination.pageIndex,
+            pageSize: pagination.pageSize,
+          }}
+          onPaginationChange={setPagination}
+          pageCount={paginationInfo.pages}
+          totalCount={paginationInfo.total}
         />
 
         <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-          <DialogContent className="sm:max-w-[425px]">
+          <DialogContent className="sm:max-w-[500px]" aria-describedby="edit-user-dialog-description">
             <DialogHeader>
-              <DialogTitle>Edit User Role</DialogTitle>
-              <DialogDescription>
-                Change the role for {selectedUser?.full_name}.
+              <DialogTitle>Edit User Profile</DialogTitle>
+              <DialogDescription id="edit-user-dialog-description">
+                Update profile information for {selectedUser?.full_name}.
               </DialogDescription>
             </DialogHeader>
             <EditUserForm
               user={selectedUser}
-              onSave={handleUpdateRole}
+              onSave={handleUpdateUser}
               onCancel={() => setIsEditDialogOpen(false)}
               isSaving={updateMutation.isPending}
             />
@@ -165,10 +215,10 @@ const UsersPage = () => {
         </Dialog>
 
         <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
-          <DialogContent className="sm:max-w-[425px]">
+          <DialogContent className="sm:max-w-[425px]" aria-describedby="create-user-dialog-description">
             <DialogHeader>
               <DialogTitle>Create New User</DialogTitle>
-              <DialogDescription>
+              <DialogDescription id="create-user-dialog-description">
                 Add a new user to the system.
               </DialogDescription>
             </DialogHeader>
@@ -181,10 +231,10 @@ const UsersPage = () => {
         </Dialog>
 
         <AlertDialog open={isDeleteAlertOpen} onOpenChange={setIsDeleteAlertOpen}>
-          <AlertDialogContent>
+          <AlertDialogContent aria-describedby="delete-user-alert-description">
             <AlertDialogHeader>
               <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-              <AlertDialogDescription>
+              <AlertDialogDescription id="delete-user-alert-description">
                 This action cannot be undone. This will permanently delete the
                 user account for <strong>{selectedUser?.full_name}</strong> ({selectedUser?.email}).
               </AlertDialogDescription>

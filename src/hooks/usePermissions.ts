@@ -1,9 +1,9 @@
-import { useUser } from "@/contexts/UserContext";
+import { useAuth } from "@/contexts/AuthContext";
 import { getPermissions, hasPermission, UserRole } from "@/utils/roles";
 
 export const usePermissions = () => {
-  const { userProfile } = useUser();
-  const role = userProfile?.role as UserRole | undefined;
+  const { user } = useAuth();
+  const role = user?.role as UserRole | undefined;
 
   const permissions = getPermissions(role);
 

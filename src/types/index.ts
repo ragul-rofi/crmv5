@@ -13,6 +13,15 @@ export type Company = {
   finalized_at?: string | null;
   assigned_data_collector_id?: string | null;
   assigned_converter_id?: string | null;
+  // New fields
+  industry?: string | null;
+  employee_count?: string | null; // Student Batch - stored as VARCHAR in DB (e.g., "C26", "C27")
+  annual_revenue?: number | null; // Company Size - number of employees
+  notes?: string | null;
+  contact_person?: string | null;
+  company_type?: "Prospect" | "Customer" | "Partner" | "Competitor" | "Vendor" | null;
+  rating?: number | null; // Salary in LPA
+  is_public?: boolean;
   // For joining data
   data_collector_name?: string;
   converter_name?: string;
@@ -32,18 +41,29 @@ export type Contact = {
 
 export type Task = {
   id: string;
-  created_at: string;
+  createdAt: string;
+  created_at: string; // Legacy snake_case for compatibility
   title: string;
   description: string | null;
   status: "NotYet" | "InProgress" | "Completed";
   priority?: "Low" | "Medium" | "High";
   deadline: string | null;
-  companyId: string;
+  companyId: string | null;
   assignedToId: string;
   assignedById: string;
+  // New fields for data collection tasks
+  targetCount?: number | null;
+  target_count?: number | null; // Legacy snake_case for form compatibility
+  startDate?: string | null;
+  start_date?: string | null; // Legacy snake_case for form compatibility
+  taskType?: "General" | "DataCollection" | "Review";
+  task_type?: "General" | "DataCollection" | "Review"; // Legacy snake_case for form compatibility
   // For joining data
   companies?: { name: string };
   users?: { full_name: string };
+  assignedToName?: string;
+  assignedByName?: string;
+  assigned_by_name?: string;
 };
 
 export type Ticket = {
@@ -98,4 +118,39 @@ export type Comment = {
   // For joining data
   user_name?: string;
   user_role?: string;
+};
+
+export type FollowUp = {
+  id: string;
+  created_at: string;
+  updated_at: string;
+  company_id: string;
+  contacted_date: string;
+  follow_up_date: string;
+  follow_up_notes: string | null;
+  contacted_by_id: string;
+  // For joining data
+  contacted_by_name?: string;
+};
+
+export type FollowUpDeletionRequest = {
+  id: string;
+  followup_id: string;
+  company_id: string;
+  requested_by_id: string;
+  status: 'pending' | 'approved' | 'rejected';
+  reason: string | null;
+  reviewed_by_id: string | null;
+  reviewed_at: string | null;
+  rejection_reason: string | null;
+  created_at: string;
+  updated_at: string;
+  // For joining data
+  contacted_date?: string;
+  follow_up_date?: string;
+  follow_up_notes?: string;
+  company_name?: string;
+  requested_by_name?: string;
+  requested_by_role?: string;
+  reviewed_by_name?: string;
 };

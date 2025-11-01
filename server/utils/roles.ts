@@ -1,6 +1,5 @@
 /**
- * Centralized Role-Based Access Control (RBAC) Configuration
- * Defines permissions for all user roles in the Refined CRM Platform
+ * Centralized Role-Based Access Control (RBAC) Configuration (Backend)
  */
 
 export type UserRole = 'Admin' | 'Head' | 'SubHead' | 'Manager' | 'DataCollector' | 'Converter';
@@ -8,21 +7,22 @@ export type UserRole = 'Admin' | 'Head' | 'SubHead' | 'Manager' | 'DataCollector
 export interface RolePermissions {
   // Read permissions
   canRead: boolean;
-  canReadFinalized: boolean; // Can read finalized/locked data
+  canReadFinalized: boolean;
   
   // Write permissions
   canCreate: boolean;
   canEdit: boolean;
   canDelete: boolean;
+  canBulkDelete: boolean; // Separate permission for bulk operations
   
   // Task management
   canAssignTasks: boolean;
-  canUpdateOwnTasks: boolean; // Can update tasks assigned to them
-  canUpdateAllTasks: boolean; // Can update any task
+  canUpdateOwnTasks: boolean;
+  canUpdateAllTasks: boolean;
   
   // Company/Data finalization
   canFinalize: boolean;
-  canEditFinalized: boolean; // Can edit finalized data
+  canEditFinalized: boolean;
   
   // User management
   canManageUsers: boolean;
@@ -32,114 +32,138 @@ export interface RolePermissions {
   
   // Custom fields
   canManageCustomFields: boolean;
+  
+  // Export finalized data
+  canExportFinalized: boolean;
 }
 
-/**
- * Complete role permissions matrix
- */
 export const ROLE_PERMISSIONS: Record<UserRole, RolePermissions> = {
-  Admin: {
-    canRead: true,
-    canReadFinalized: true,
-    canCreate: true,
-    canEdit: true,
-    canDelete: true,
-    canAssignTasks: true,
-    canUpdateOwnTasks: true,
-    canUpdateAllTasks: true,
-    canFinalize: true,
-    canEditFinalized: true,
-    canManageUsers: true,
-    canComment: true,
-    canManageCustomFields: true,
+  "Admin": {
+    "canRead": true,
+    "canReadFinalized": true,
+    "canCreate": true,
+    "canEdit": true,
+    "canDelete": true,
+    "canBulkDelete": true,
+    "canAssignTasks": true,
+    "canUpdateOwnTasks": true,
+    "canUpdateAllTasks": true,
+    "canFinalize": true,
+    "canEditFinalized": true,
+    "canManageUsers": true,
+    "canComment": true,
+    "canManageCustomFields": true,
+    "canExportFinalized": true
   },
-  
-  Head: {
-    canRead: true,
-    canReadFinalized: true,
-    canCreate: false,
-    canEdit: false,
-    canDelete: false,
-    canAssignTasks: false,
-    canUpdateOwnTasks: false,
-    canUpdateAllTasks: false,
-    canFinalize: false,
-    canEditFinalized: false,
-    canManageUsers: false,
-    canComment: true,
-    canManageCustomFields: false,
+  "Head": {
+    "canRead": true,
+    "canReadFinalized": true,
+    "canCreate": false,
+    "canEdit": false,
+    "canDelete": false,
+    "canBulkDelete": false,
+    "canAssignTasks": true,
+    "canUpdateOwnTasks": false,
+    "canUpdateAllTasks": false,
+    "canFinalize": false,
+    "canEditFinalized": false,
+    "canManageUsers": false,
+    "canComment": true,
+    "canManageCustomFields": false,
+    "canExportFinalized": true
   },
-  
-  SubHead: {
-    canRead: true,
-    canReadFinalized: true,
-    canCreate: false,
-    canEdit: false,
-    canDelete: false,
-    canAssignTasks: false,
-    canUpdateOwnTasks: false,
-    canUpdateAllTasks: false,
-    canFinalize: false,
-    canEditFinalized: false,
-    canManageUsers: false,
-    canComment: true,
-    canManageCustomFields: false,
+  "SubHead": {
+    "canRead": true,
+    "canReadFinalized": true,
+    "canCreate": false,
+    "canEdit": false,
+    "canDelete": false,
+    "canBulkDelete": false,
+    "canAssignTasks": true,
+    "canUpdateOwnTasks": false,
+    "canUpdateAllTasks": false,
+    "canFinalize": false,
+    "canEditFinalized": false,
+    "canManageUsers": false,
+    "canComment": true,
+    "canManageCustomFields": false,
+    "canExportFinalized": true
   },
-  
-  Manager: {
-    canRead: true,
-    canReadFinalized: true,
-    canCreate: true,
-    canEdit: true,
-    canDelete: true,
-    canAssignTasks: true,
-    canUpdateOwnTasks: true,
-    canUpdateAllTasks: true,
-    canFinalize: true,
-    canEditFinalized: false, // Cannot edit finalized data
-    canManageUsers: true,
-    canComment: true,
-    canManageCustomFields: true,
+  "Manager": {
+    "canRead": true,
+    "canReadFinalized": true,
+    "canCreate": true,
+    "canEdit": true,
+    "canDelete": true,
+    "canBulkDelete": true,
+    "canAssignTasks": true,
+    "canUpdateOwnTasks": true,
+    "canUpdateAllTasks": true,
+    "canFinalize": true,
+    "canEditFinalized": true,
+    "canManageUsers": true,
+    "canComment": true,
+    "canManageCustomFields": true,
+    "canExportFinalized": true
   },
-  
-  DataCollector: {
-    canRead: true,
-    canReadFinalized: false,
-    canCreate: true,  // Can add company data
-    canEdit: true,    // Can manage and update company data
-    canDelete: true,  // Can remove company data
-    canAssignTasks: false,
-    canUpdateOwnTasks: true, // Can update their assigned tasks
-    canUpdateAllTasks: false,
-    canFinalize: false,
-    canEditFinalized: false,
-    canManageUsers: false,
-    canComment: false,
-    canManageCustomFields: false,
+  "DataCollector": {
+    "canRead": true,
+    "canReadFinalized": false,
+    "canCreate": true,
+    "canEdit": true,
+    "canDelete": true,
+    "canBulkDelete": true,
+    "canAssignTasks": false,
+    "canUpdateOwnTasks": true,
+    "canUpdateAllTasks": false,
+    "canFinalize": false,
+    "canEditFinalized": false,
+    "canManageUsers": false,
+    "canComment": false,
+    "canManageCustomFields": false,
+    "canExportFinalized": false
   },
-  
-  Converter: {
-    canRead: true,
-    canReadFinalized: false,
-    canCreate: false,
-    canEdit: false,
-    canDelete: false,
-    canAssignTasks: false,
-    canUpdateOwnTasks: true, // Can update their assigned conversion tasks
-    canUpdateAllTasks: false,
-    canFinalize: false,
-    canEditFinalized: false,
-    canManageUsers: false,
-    canComment: false,
-    canManageCustomFields: false,
-  },
+  "Converter": {
+    "canRead": true,
+    "canReadFinalized": false,
+    "canCreate": false,
+    "canEdit": true,
+    "canDelete": false,
+    "canBulkDelete": false,
+    "canAssignTasks": false,
+    "canUpdateOwnTasks": true,
+    "canUpdateAllTasks": false,
+    "canFinalize": true,
+    "canEditFinalized": false,
+    "canManageUsers": false,
+    "canComment": true,
+    "canManageCustomFields": false,
+    "canExportFinalized": false
+  }
 };
 
-/**
- * Get permissions for a specific role
- */
-export const getPermissions = (role: UserRole): RolePermissions => {
-  return ROLE_PERMISSIONS[role] || ROLE_PERMISSIONS.DataCollector; // Default to most restrictive
+export const getPermissions = (role: UserRole | null | undefined): RolePermissions => {
+  if (!role) {
+    // Return most restrictive permissions for unauthenticated users
+    return {
+      canRead: false,
+      canReadFinalized: false,
+      canCreate: false,
+      canEdit: false,
+      canDelete: false,
+      canBulkDelete: false,
+      canAssignTasks: false,
+      canUpdateOwnTasks: false,
+      canUpdateAllTasks: false,
+      canFinalize: false,
+      canEditFinalized: false,
+      canManageUsers: false,
+      canComment: false,
+      canManageCustomFields: false,
+      canExportFinalized: false,
+    };
+  }
+  return ROLE_PERMISSIONS[role] || ROLE_PERMISSIONS.DataCollector;
 };
 
 /**
@@ -176,6 +200,9 @@ export const ROLE_GROUPS = {
   
   // Can manage custom fields
   CUSTOM_FIELD_MANAGERS: ['Admin', 'Manager'] as UserRole[],
+  
+  // Can export finalized data
+  FINALIZED_DATA_EXPORTERS: ['Admin', 'Head', 'SubHead', 'Manager'] as UserRole[], // Updated to include Manager
 };
 
 /**

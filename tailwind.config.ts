@@ -62,6 +62,15 @@ export default {
           border: "hsl(var(--sidebar-border))",
           ring: "hsl(var(--sidebar-ring))",
         },
+        // Silva specific colors
+        silva: {
+          blue: "#3B82F6",
+          "blue-dark": "#1E40AF",
+          slate: "#0F172A",
+          "slate-light": "#1E293B",
+          gray: "#64748B",
+          "gray-light": "#F1F5F9",
+        },
       },
       borderRadius: {
         lg: "var(--radius)",

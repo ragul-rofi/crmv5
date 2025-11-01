@@ -1,4 +1,6 @@
 import { query } from '../db.js';
+import { safeLog } from './logger.js';
+import { notifyUser, broadcastUpdate } from '../socket.js';
 
 /**
  * Create a notification for a user
@@ -9,9 +11,12 @@ export async function createNotification(userId: string, message: string): Promi
       'INSERT INTO notifications ("userId", message) VALUES ($1, $2)',
       [userId, message]
     );
-    console.log(`✅ Notification created for user ${userId}`);
+    safeLog.info('✅ Notification created for user');
+    
+    // Send real-time notification
+    notifyUser(userId, { message, timestamp: new Date().toISOString() });
   } catch (error) {
-    console.error('Error creating notification:', error);
+    safeLog.error('Error creating notification:', error);
   }
 }
 

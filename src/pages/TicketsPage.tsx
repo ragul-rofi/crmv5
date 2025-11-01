@@ -26,13 +26,14 @@ import {
 import { DataTable } from "./data/DataTable";
 import { getColumns } from "./tickets/columns";
 import TicketForm from "./tickets/TicketForm";
+import { PaginationState } from "@tanstack/react-table";
 
-const fetchTickets = async () => {
-  return api.getTickets();
+const fetchTickets = async (page: number = 1, limit: number = 50) => {
+  return api.getTickets(page, limit);
 };
 
-const fetchCompanies = async () => {
-  return api.getCompanies();
+const fetchCompanies = async (page: number = 1, limit: number = 1000) => {
+  return api.getCompanies(page, limit);
 };
 
 const fetchUsers = async () => {
@@ -46,19 +47,38 @@ const TicketsPage = () => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isAlertOpen, setIsAlertOpen] = useState(false);
   const [selectedTicket, setSelectedTicket] = useState<Ticket | null>(null);
+  
+  // Pagination state
+  const [pagination, setPagination] = useState<PaginationState>({
+    pageIndex: 0,
+    pageSize: 50,
+  });
 
-  const { data: tickets, isLoading: isLoadingTickets } = useQuery<Ticket[]>({
-    queryKey: ["tickets"],
-    queryFn: fetchTickets,
+  const { data: ticketsData, isLoading: isLoadingTickets } = useQuery({
+    queryKey: ["tickets", pagination.pageIndex, pagination.pageSize],
+    queryFn: () => fetchTickets(pagination.pageIndex + 1, pagination.pageSize),
   });
-  const { data: companies, isLoading: isLoadingCompanies } = useQuery<Company[]>({
+  
+  const { data: companiesData, isLoading: isLoadingCompanies } = useQuery({
     queryKey: ["companies"],
-    queryFn: fetchCompanies,
+    queryFn: () => fetchCompanies(1, 1000),
   });
+  
+  // Extract companies array from paginated response
+  const companies = companiesData?.data || [];
+  
   const { data: users, isLoading: isLoadingUsers } = useQuery<User[]>({
     queryKey: ["users"],
     queryFn: fetchUsers,
   });
+  
+  // Extract data and pagination info
+  const tickets = ticketsData?.data || [];
+  const paginationInfo = {
+    page: ticketsData?.pagination?.page || 1,
+    pages: ticketsData?.pagination?.pages || 1,
+    total: ticketsData?.pagination?.total || 0,
+  };
 
   const mutation = useMutation({
     mutationFn: async (
@@ -138,10 +158,13 @@ const TicketsPage = () => {
   const isLoading = isLoadingTickets || isLoadingCompanies || isLoadingUsers;
 
   return (
-    <div className="p-8 pt-6">
-        <div className="flex items-center justify-between mb-6">
-          <h1 className="text-3xl font-bold">Tickets</h1>
-          <Button onClick={handleAddNew}>Add Ticket</Button>
+    <div className="p-6 space-y-6">
+        <div className="flex flex-col md:flex-row md:items-center justify-between mb-6 gap-4">
+          <div>
+            <h1 className="text-2xl md:text-3xl font-bold">Tickets</h1>
+            <p className="text-muted-foreground mt-1">Manage support tickets and requests</p>
+          </div>
+          <Button onClick={handleAddNew} className="btn-primary">Add Ticket</Button>
         </div>
         {isLoading ? (
           <div>Loading...</div>
@@ -151,16 +174,23 @@ const TicketsPage = () => {
             data={tickets || []}
             filterColumnId="title"
             filterPlaceholder="Filter by ticket title..."
+            pagination={{
+              pageIndex: pagination.pageIndex,
+              pageSize: pagination.pageSize,
+            }}
+            onPaginationChange={setPagination}
+            pageCount={paginationInfo.pages}
+            totalCount={paginationInfo.total}
           />
         )}
 
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-          <DialogContent>
+          <DialogContent className="sm:max-w-[800px] max-h-[90vh] overflow-y-auto" aria-describedby="ticket-dialog-description">
             <DialogHeader>
               <DialogTitle>
                 {selectedTicket ? "Edit Ticket" : "Add New Ticket"}
               </DialogTitle>
-              <DialogDescription>
+              <DialogDescription id="ticket-dialog-description">
                 {selectedTicket
                   ? "Update the details of the ticket."
                   : "Enter the details for the new ticket."}
@@ -178,10 +208,10 @@ const TicketsPage = () => {
         </Dialog>
 
         <AlertDialog open={isAlertOpen} onOpenChange={setIsAlertOpen}>
-          <AlertDialogContent>
+          <AlertDialogContent aria-describedby="delete-ticket-alert-description">
             <AlertDialogHeader>
               <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-              <AlertDialogDescription>
+              <AlertDialogDescription id="delete-ticket-alert-description">
                 This action cannot be undone. This will permanently delete the
                 ticket &quot;{selectedTicket?.title}&quot;.
               </AlertDialogDescription>

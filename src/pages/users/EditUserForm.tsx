@@ -1,4 +1,5 @@
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
   Select,
@@ -12,7 +13,7 @@ import { useEffect, useState } from "react";
 
 interface EditUserFormProps {
   user: User | null;
-  onSave: (userId: string, role: User["role"]) => void;
+  onSave: (userId: string, userData: Partial<User>) => void;
   onCancel: () => void;
   isSaving: boolean;
 }
@@ -25,34 +26,74 @@ const EditUserForm = ({
   onCancel,
   isSaving,
 }: EditUserFormProps) => {
-  const [selectedRole, setSelectedRole] = useState<User["role"] | "">("");
+  const [formData, setFormData] = useState({
+    full_name: "",
+    email: "",
+    role: "" as User["role"] | "",
+    region: "",
+  });
 
   useEffect(() => {
     if (user) {
-      setSelectedRole(user.role);
+      setFormData({
+        full_name: user.full_name || "",
+        email: user.email || "",
+        role: user.role || "",
+        region: user.region || "",
+      });
     }
   }, [user]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (user && selectedRole) {
-      onSave(user.id, selectedRole as User["role"]);
+    if (user && formData.role && formData.full_name && formData.email) {
+      onSave(user.id, {
+        full_name: formData.full_name,
+        email: formData.email,
+        role: formData.role as User["role"],
+        region: formData.region || null,
+      });
     }
+  };
+
+  const handleChange = (field: string, value: string) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
   };
 
   if (!user) return null;
 
   return (
     <form onSubmit={handleSubmit} className="grid gap-4 py-4">
-      <div className="grid grid-cols-4 items-center gap-4">
-        <Label htmlFor="role" className="text-right">
-          Role
-        </Label>
+      <div className="grid gap-2">
+        <Label htmlFor="full_name">Full Name</Label>
+        <Input
+          id="full_name"
+          value={formData.full_name}
+          onChange={(e) => handleChange("full_name", e.target.value)}
+          placeholder="Enter full name"
+          required
+        />
+      </div>
+
+      <div className="grid gap-2">
+        <Label htmlFor="email">Email</Label>
+        <Input
+          id="email"
+          type="email"
+          value={formData.email}
+          onChange={(e) => handleChange("email", e.target.value)}
+          placeholder="Enter email"
+          required
+        />
+      </div>
+
+      <div className="grid gap-2">
+        <Label htmlFor="role">Role</Label>
         <Select
-          onValueChange={(value) => setSelectedRole(value as User["role"])}
-          value={selectedRole}
+          onValueChange={(value) => handleChange("role", value)}
+          value={formData.role}
         >
-          <SelectTrigger className="col-span-3">
+          <SelectTrigger id="role">
             <SelectValue placeholder="Select a role" />
           </SelectTrigger>
           <SelectContent>
@@ -62,7 +103,18 @@ const EditUserForm = ({
           </SelectContent>
         </Select>
       </div>
-      <div className="flex justify-end gap-2">
+
+      <div className="grid gap-2">
+        <Label htmlFor="region">Region</Label>
+        <Input
+          id="region"
+          value={formData.region}
+          onChange={(e) => handleChange("region", e.target.value)}
+          placeholder="Enter region (optional)"
+        />
+      </div>
+
+      <div className="flex justify-end gap-2 mt-4">
         <Button type="button" variant="outline" onClick={onCancel}>
           Cancel
         </Button>
