@@ -1,10 +1,9 @@
-import { BaseService } from './BaseService.js';
 import { query } from '../db.js';
 import { writeFile, mkdir } from 'fs/promises';
 import { join } from 'path';
 import { v4 as uuidv4 } from 'uuid';
 
-export class FileService extends BaseService {
+export class FileService {
   private uploadDir = 'uploads';
 
   async uploadFile(file: any, entityType: string, entityId: string, uploadedBy: string) {

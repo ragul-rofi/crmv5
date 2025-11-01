@@ -1,7 +1,6 @@
-import { BaseService } from './BaseService.js';
 import { query } from '../db.js';
 
-export class AdminService extends BaseService {
+export class AdminService {
   // Role permissions management
   async updateRolePermissions(rolePermissions: any) {
     // Store role permissions in database

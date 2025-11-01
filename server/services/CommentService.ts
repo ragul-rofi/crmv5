@@ -1,7 +1,6 @@
-import { BaseService } from './BaseService.js';
 import { query } from '../db.js';
 
-export class CommentService extends BaseService {
+export class CommentService {
   async getByEntity(entityType: string, entityId: string) {
     const comments = await query(`
       SELECT c.*, u.full_name as author_name

@@ -1,9 +1,8 @@
-import { BaseService } from './BaseService.js';
 import { query } from '../db.js';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
 
-export class AuthService extends BaseService {
+export class AuthService {
   private readonly JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
   private readonly REFRESH_SECRET = process.env.REFRESH_SECRET || 'refresh-secret';
   private readonly ACCESS_TOKEN_EXPIRY = '15m';

@@ -26,7 +26,7 @@ const redisClient = new Redis({
   host: process.env.REDIS_HOST || 'localhost',
   port: parseInt(process.env.REDIS_PORT || '6379'),
   password: process.env.REDIS_PASSWORD || undefined,
-  retryStrategy: (times) => {
+  retryStrategy: (times: number) => {
     // Exponential backoff with max 30 seconds
     const delay = Math.min(times * 50, 30000);
     safeLog.info(`Redis retry attempt ${times}, waiting ${delay}ms`);
@@ -45,7 +45,7 @@ redisClient.on('connect', () => {
   redisAvailable = true;
 });
 
-redisClient.on('error', (err) => {
+redisClient.on('error', (err: any) => {
   safeLog.error('Redis client error:', err);
   redisAvailable = false;
 });
@@ -65,7 +65,7 @@ redisClient.on('ready', () => {
 });
 
 // Test connection on startup
-redisClient.connect().catch(err => {
+redisClient.connect().catch((err: any) => {
   safeLog.error('Failed to connect to Redis on startup:', err);
   redisAvailable = false;
 });

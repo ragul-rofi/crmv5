@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { query } from '../db.js';
-import { verifyToken } from '../auth.js';
+import { verifyToken, AuthRequest } from '../auth.js';
 
 const router = Router();
 
@@ -63,7 +63,7 @@ router.get('/full', async (req, res) => {
 });
 
 // Test authentication
-router.get('/auth', verifyToken, async (req, res) => {
+router.get('/auth', verifyToken, async (req: AuthRequest, res) => {
   res.json({
     authenticated: true,
     user: {
@@ -76,7 +76,7 @@ router.get('/auth', verifyToken, async (req, res) => {
 });
 
 // Test all API endpoints
-router.get('/endpoints', verifyToken, async (req, res) => {
+router.get('/endpoints', verifyToken, async (req: AuthRequest, res) => {
   const endpoints = {
     companies: '/api/companies',
     users: '/api/users',

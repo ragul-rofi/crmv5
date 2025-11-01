@@ -1,7 +1,6 @@
-import { BaseService } from './BaseService.js';
 import { query } from '../db.js';
 
-export class MonitoringService extends BaseService {
+export class MonitoringService {
   async logError(error: Error, context: any) {
     try {
       await query(
